@@ -34,4 +34,4 @@ def is_number_balanced(number):
 
 #print((2324//10)%10)
 number = int(input())
-print(is_number_balanced(number))	
+print(is_number_balanced(number))

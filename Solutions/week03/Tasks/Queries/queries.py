@@ -23,10 +23,11 @@ def generate_full_valid_keyword_dict(validKeywords):
 
     for keyword in validKeywords:
         for command in siftCommands:
-            allKeywords.update({f'{keyword}{command}': [command, validKeywords[keyword]]})
+           allKeywords.update({f'{keyword}{command}' : [command, validKeywords[keyword]]})
+
         for command in postSiftCommands:
             allKeywords.update({command: [validKeywords[keyword]]})
-    
+
     return allKeywords
 
 def map_keywords(validKeywords, passedInKeywords):
@@ -43,7 +44,8 @@ def map_keywords(validKeywords, passedInKeywords):
 
 def split_post_and_pre_csv_sifting_commands(mappedKeywords):
     
-    result = [{},{}]
+    n = 2
+    result = [{} for _ in range(n)]
 
     for element in mappedKeywords:
         if element in postSiftCommands:
@@ -51,25 +53,8 @@ def split_post_and_pre_csv_sifting_commands(mappedKeywords):
         else:
             result[1].update({element:mappedKeywords[element]})
     
+    print(result)
     return result
-
-def less_than(number, upperLimit):
-    doubleNum = float(number)
-    doubleLimit = float(upperLimit)
-    if doubleNum < doubleLimit:
-        return True
-    
-    return False
-
-def greater_than(number, lowerLimit):
-    doubleNum = float(number)
-    doubleLimit = float(lowerLimit)
-
-    print(f'{doubleNum} ? {doubleLimit}')
-    if doubleNum > doubleLimit:
-        return True
-    
-    return False
 
 def sift_csv_file(csvFile, siftKeywords):
     result = []
@@ -114,6 +99,30 @@ def sift_csv_file(csvFile, siftKeywords):
     
     return result
 
+def run_post_sift_commands(data, postSiftKeywords):
+    for keyword in postSiftKeywords:
+        if keyword == postSiftCommands[0]:
+            print(keyword)
+            data.sort(key = data[keyword])
+
+def greater_than(number, lowerLimit):
+    doubleNum = float(number)
+    doubleLimit = float(lowerLimit)
+
+    #print(f'{doubleNum} ? {doubleLimit}')
+    if doubleNum > doubleLimit:
+        return True
+    
+    return False
+
+def less_than(number, upperLimit):
+    doubleNum = float(number)
+    doubleLimit = float(upperLimit)
+    if doubleNum < doubleLimit:
+        return True
+    
+    return False
+
 def filter(fileName, **keywords):
     try:
         with open(fileName, 'r') as csvFile:
@@ -122,25 +131,38 @@ def filter(fileName, **keywords):
             
             allValidKeywords = generate_full_valid_keyword_dict(validRowKeywords)
             
-            #print(allValidKeywords)
-
             mappedKeywords = map_keywords(allValidKeywords, keywords)
             
             postSiftKeywords, preSiftKeywords = map(dict,split_post_and_pre_csv_sifting_commands(mappedKeywords))
             
-            print(preSiftKeywords)
-            print(postSiftKeywords)
-            
+            #print(postSiftCommands)
+            #print(preSiftKeywords)
             data = sift_csv_file(csvFile, preSiftKeywords)
-            print(data)
+            run_post_sift_commands(data, postSiftKeywords)
+            return data
 
     except OSError:
         raise OSError(f'Failed to open file: {fileName}\n')
 
-def main():
-    data = filter(sys.argv[1], salary__gt=1000, salary__lt=3000)
-    #print(data)
+def count(fileName, **keywords):
+    data = filter(fileName, keywords)
+    return len(data)
 
+def first(fileName, **keywords):
+    data = filter(fileName, keywords)
+    if len(data) > 0:
+        return data[0]
+    return data
+
+def last(fileName, **keywords):
+    data = filter(fileName, keywords)
+    if len(data):
+        return data[len(data) - 1]
+    return data
+
+def main():
+    data = filter(sys.argv[1], salary__gt=1000, salary__lt=3000, order_by ='salary')
+    #print(data)
 
 if __name__ == '__main__':
     main()

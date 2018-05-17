@@ -6,7 +6,7 @@ class Performance:
         self.file_name = file_name
         self.file_handler = None
         self.timer = None
-
+        
     def __time__(self):
         return time.time()
 

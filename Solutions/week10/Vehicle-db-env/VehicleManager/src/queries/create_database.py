@@ -1,5 +1,5 @@
 import sqlite3
-
+from sqlite3_handler import execute_and_commit
 
 class Column:
     def __init__(self, *,
@@ -34,19 +34,12 @@ class DataBase:
     def __init__(self, *, dbName):
         self.dbName = dbName
 
-    def __make_change(self, *, query):
-        connection = sqlite3.connect(self.dbName)
-        curs = connection.cursor()
-        curs.execute(query)
-        connection.commit()
-        connection.close()
-
     def create_table(self, *, tableName, columns):
         foreign_key_string = ''
 
         CREATE_TABLE_SQL = f'''\
 CREATE TABLE IF NOT EXISTS {tableName} (
-ID INTEGER PRIMARY KEY AUTOINCREMENT'''
+ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL'''
 
         for c in columns:
             foreign_key_string += c.foreign_key()
@@ -58,13 +51,13 @@ ID INTEGER PRIMARY KEY AUTOINCREMENT'''
         print(foreign_key_string)
         print('~~~~~~~')
         print(CREATE_TABLE_SQL)
-        self.__make_change(query=CREATE_TABLE_SQL)
+        execute_and_commit(dbName=self.dbName,query=CREATE_TABLE_SQL)
 
     def drop_table(self, *, tableName):
         DROP_TABLE_SQL = f'''
         DROP TABLE IF EXISTS {tableName};
         '''
-        self.__make_change(query=DROP_TABLE_SQL)
+        execute_and_commit(dbName=self.dbName,query=DROP_TABLE_SQL)
 
 
 DATABASE = 'queries/database/vehicle_management.db'
@@ -79,6 +72,9 @@ def generate_database():
         tableName='BaseUser',
         columns=[
             Column(columnName='user_name',
+                   columnType='VARCHAR',
+                   isNullable=False),
+            Column(columnName='password',
                    columnType='VARCHAR',
                    isNullable=False),
             Column(columnName='email',
@@ -149,20 +145,15 @@ def generate_database():
         columns=[
             Column(columnName='name',
                    columnType='VARCHAR',
-                   isNullable=False)
-        ]
-    )
-
-    db.drop_table(tableName='MechanicService')
-    db.create_table(
-        tableName='MechanicService',
-        columns=[
+                   isNullable=False),
             Column(columnName='mechanic_id',
                    columnType='INTEGER',
                    isForeignKey=True,
                    references='Mechanic')
         ]
     )
+
+    db.drop_table(tableName='MechanicService')
 
     db.drop_table(tableName='VehicleRepair')
     db.create_table(

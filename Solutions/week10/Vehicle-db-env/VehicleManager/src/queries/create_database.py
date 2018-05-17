@@ -14,6 +14,7 @@ class Column:
         self.isForeignKey = isForeignKey
         self. references = references
 
+
     def nullable(self):
         return 'NOT NULL' if not self.isNullable else ''
 

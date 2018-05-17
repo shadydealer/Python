@@ -33,7 +33,7 @@ class DataBase:
     def __init__(self, *, dbName):
         self.dbName = dbName
 
-    def __make_change(self,*,query):
+    def __make_change(self, *, query):
         connection = sqlite3.connect(self.dbName)
         curs = connection.cursor()
         curs.execute(query)
@@ -64,14 +64,14 @@ ID INTEGER PRIMARY KEY AUTOINCREMENT'''
         DROP TABLE IF EXISTS {tableName};
         '''
         self.__make_change(query=DROP_TABLE_SQL)
-    
+
+
 DATABASE = 'queries/database/vehicle_management.db'
 
 
 def generate_database():
 
     db = DataBase(dbName=DATABASE)
-    
 
     db.drop_table(tableName='BaseUser')
     db.create_table(
